@@ -1,0 +1,273 @@
+Project Title: E-commerce API
+
+
+A. Core Features to Implement:
+
+1. User Authentication (Sign Up, Login, Logout)
+	Sign Up:
+		- Users register with their details (name, email, password).
+		- Passwords should be hashed using bcrypt.
+		- User role (Customer or Admin) can be assigned during registration (Admin has full access, while Customers only have access to their own data).
+
+	Login:
+		- User credentials are validated and a JWT (JSON Web Token) is generated.
+		- This JWT should be used to authenticate future requests.
+
+	Logout:
+		- Client can discard the JWT token. Optionally, implement token blacklist for invalidation.
+
+
+	Get Profile:
+		- Authenticated users can view their profile details.
+
+
+2. Role-Based Access Control (RBAC)
+	Admin:
+		- Full access to all resources, including user management, product management, and order processing.
+		- Can manage Merchants (e.g., assign products, approve/reject listings).
+
+	Merchant:
+		- Responsible for managing their own products (CRUD operations on products they’ve listed).
+		- Can view and manage only their own orders (i.e., orders for products they sell).
+		- Cannot access user management or other merchants' data.
+
+	Customer:
+		- Can browse products, place orders, and view their own order history.
+		- Cannot modify products or view any other user’s order data.
+
+	
+	Middleware:
+		- Implement middleware to secure routes based on roles (Admin, Merchant, Customer).
+		- Use JWT (JSON Web Token) to identify user roles and ensure the proper access control.
+		- Admin routes (e.g., user/product/order management) should be protected to only allow access to Admin users.
+		- Merchant routes (e.g., product CRUD, order viewing) should be protected to only allow access to Merchants.
+		- Customer routes (e.g., browsing, placing orders) should be restricted to customers.
+
+
+3. Product Management (CRUD Operations)
+	Create Product:
+		- Merchant: Merchants can create products with the following attributes:
+			-> Name, Description, Price, Category, Stock Quantity, Image URL.
+			-> These products will be linked to the Merchant.
+
+		- Admin: Admins do not create products but manage and moderate the products listed by Merchants.
+
+	Read Product:
+		- Public: Publicly accessible endpoint for viewing all products.
+		- Merchant: Can only view the products they’ve created (their own products).
+		- Pagination: Pagination for product listings.
+
+	Update Product:
+		- Admins can update the product information (e.g., price, description, stock) for any product created by any Merchant.
+		- Merchant: Can update only their own products.
+		- Security: Ensure that Merchants cannot update other Merchants' products.
+
+	Delete Product:
+		- Admin: Can delete any product from the catalog or created by the Merchant.
+		- Merchant: Can delete only their own products (the ones they have created).
+		- Security: Ensure that Merchants cannot delete products created by other Merchants.
+
+
+	Security:	
+		- Ensure that only Admins can modify or delete products that belong to other Merchants.
+		- Ensure that Merchants can only modify or delete the products they’ve created, and cannot access or affect products created by other users (other Merchants).
+
+
+
+4. Shopping Cart and Order Management
+	Add to Cart:
+		- Customers can add products to their shopping cart.
+		- Cart items should have product ID, quantity, and price.
+		- Merchants do not add items to their own cart, but will be notified when a customer adds their products to the cart.
+
+	View Cart:
+		- Customers can view their cart and modify quantities or remove items.
+		- Cart items will be associated with the products the customer has added.
+
+	Checkout:
+		- Customers can proceed to checkout where they will need to provide shipping details and make payments.
+		- At checkout, the order total will be calculated based on the products in the cart and any discounts or promotions applied.
+
+	Place Order:
+		- After checkout, an order is created, containing customer details, order items, and total price.
+		- Order status (e.g., Pending, Shipped, Delivered, Cancelled).
+		- Each order will have a Merchant ID linked to the products they sell.
+
+	View Order History:
+		- Customers can view their past orders, including details about the products purchased, order status, and delivery information.
+
+	Admin Order Management:
+		- Admins can view all orders and change their status (e.g., mark an order as Shipped, Delivered, or Cancelled).
+		- Admins can also view which Merchant's product was ordered but cannot manage or view customer-specific order details beyond status and fulfillment.
+
+	Handling Multiple Merchants in Orders:
+		- Since multiple merchants could be involved in one customer's order (if the cart has products from different merchants), you’ll need to ensure that the order is split accordingly and that the merchant gets their own order details.
+			  -> For example, if a customer buys two products, one from Merchant A and one from Merchant B, the backend could split the order into two records, one for each merchant.
+
+5. Payment Integration
+	Payment Gateway:
+		- Integrate with Stripe or PayPal to handle payment processing.
+		- Frontend will collect payment information (e.g., credit card details) using Stripe.js or PayPal's Braintree SDK and tokenize it for secure submission.
+		- Backend will receive the payment token and process the payment using the Stripe API or PayPal API.
+		- Upon successful payment, update the order status to "Paid".
+		- If the order is ready to be shipped, update the status to "Shipped" when appropriate.
+
+	Payment Confirmation:
+		- Handle responses from the payment gateway (Stripe/PayPal) to confirm payment success or failure.
+		- If payment is successful, update the order status to "Paid".
+		- If payment fails, return an appropriate error message to the frontend (e.g., "Payment failed. Please try again.").
+		- Optionally, use webhooks from Stripe/PayPal to automatically handle payment status updates when necessary.
+
+6. Product Categories
+	Category Management:
+		- Create product categories (e.g., Electronics, Clothing, Books).
+		- Products should belong to one or more categories.
+
+	Filtering by Category:
+		- Customers can filter products based on category.
+
+
+
+7. Search and Filtering
+	Search Functionality:
+		- Implement search functionality that allows customers to search products by:
+				-> Name: Search for products based on their name.
+				-> Description: Search for products by keywords found in the description.
+				-> Category: Filter products by category (e.g., "Electronics", "Clothing", etc.).
+
+	Filtering Parameters:
+		- Filters should allow customers to refine product listings by the following:
+			-> Price Range:
+					a. Parameters: price[min], price[max].
+					b. Example: /products?price[min]=100&price[max]=500 will return products priced between 100 and 500.
+
+			-> Rating:
+					a. Parameter: rating[min].
+					b. Example: /products?rating[min]=4 will return products with a rating of 4 stars or higher.
+			
+			-> Availability:
+					a. Parameter: availability=true/false.
+					b. Example: /products?availability=true will return products that are currently in stock.
+	
+	Sorting Options:
+			- Allow users to sort products by:
+				-> Price: Sort in ascending (price_asc) or descending (price_desc) order.
+				-> Rating: Sort by rating in ascending (rating_asc) or descending (rating_desc) order.
+						---> Example: /products?sort=price_desc or /products?sort=rating_asc.
+
+
+8. Reviews and Ratings
+	Customer Reviews:
+		- Allow customers to leave reviews and ratings (1-5 stars) on products they’ve purchased.
+		- Implement an endpoint for viewing product reviews.
+		- Implement an endpoint for fetching reviews for a product.
+
+	Average Rating:
+		- Calculate the average rating based on the reviews for each product.
+		- Display the average rating for each product.
+
+
+
+
+
+B. Bonus Features (Advanced):
+	
+1. Real-Time Updates (Optional)
+	- Implement real-time notifications for customers when their order status changes (e.g., order shipped).
+	- Use Socket.io to broadcast real-time notifications.
+
+2. Wishlist System (Optional)
+	- Allow customers to add products to their wishlist.
+	- Create endpoints to view, add, and remove items from the wishlist.
+
+3. Inventory Management
+	- Keep track of stock quantities for each product.
+	- Ensure that customers can only order products that are in stock.
+	- Optionally, implement low-stock alerts for admins.
+
+4. Discounts and Coupons
+	- Implement discount codes or coupons that customers can apply during checkout for a discount on their order.
+	- Optionally, set expiration dates for coupons and restrictions on which products they apply to.
+
+5. Rate Limiting (Optional)
+	- Use express-rate-limit to limit the number of requests that can be made to your API, protecting it from abuse and ensuring fairness.
+
+6. Logging and Monitoring (Optional)
+	- Use winston or another logging library to log key actions in the system (e.g., product creation, order placement).
+	- Set up error monitoring with tools like Sentry or LogRocket.
+
+
+
+C. API Documentation with Swagger
+	- Document the API using Swagger so that users (and other developers) know how to interact with your endpoints.
+
+	- Include documentation for:
+		- User authentication endpoints.
+		- Product CRUD endpoints.
+		- Order management endpoints.
+		- Payment processing.
+
+	- Interactive API Docs:
+		- Use swagger-ui-express to serve interactive API docs at /api-docs.
+
+
+D. Deployment (Optional but Recommended)
+	- Host your API on platforms like Heroku, AWS, Vercel, or DigitalOcean.
+	- Use MongoDB Atlas to host your MongoDB database in the cloud.	
+	- Use Stripe or PayPal Sandbox for payment testing during development.
+	- Ensure the API is scalable, especially if you're expecting higher traffic as your project grows.
+
+
+
+
+E. Code Quality & Best Practices
+	- Environment Variables:
+		- Use dotenv to manage sensitive information like JWT secrets, database URI, and API keys.
+
+	
+	- Folder Structure:
+		- Keep your project modular with separate folders for routes, controllers, models, middleware, utils, and config.
+
+	- Input Validation:
+		- Use express-validator to ensure user inputs (like product data and order info) are valid.
+
+	- Error Handling:
+		- Centralized error handling for better response consistency.
+
+	- HTTP Status Codes:
+		- Use correct HTTP status codes (e.g., 200 OK, 201 Created, 400 Bad Request, 500 Internal Server Error).
+
+	- Version Control:
+		- Use Git for version control with meaningful commit messages.
+
+
+F. Final Checklist:
+	- User authentication (signup, login, logout with JWT).
+	- Role-based access control (Admin, Customer, Merchant).
+	- CRUD operations for products (Create, Read, Update, Delete) with proper permissions for Admin and Merchant roles.
+	- Shopping cart and order management.
+	- Payment gateway integration (Stripe or PayPal).
+	- Search and filtering for products.	
+	- Product categories and ratings.
+	- Swagger documentation for the API.
+	- Deploy the app to a cloud service like Heroku or AWS.
+	- (Optional) Real-time updates and webhooks.
+	- (Optional) Discounts/coupons, inventory management, logging.
+
+----------------------------------------------
+
+MongoDB TTL for Token Expiration:
+	- TTL Index: MongoDB’s TTL index will automatically expire JWT tokens and session data after a specified period (e.g., 1 hour). If the user logs out, the token will immediately expire. Expired tokens will remain in the database until the TTL index removes them automatically after the set time period (e.g., 1 hour).
+
+---------------------------------------------------------------------------------------------------------------------
+
+Tech Stack:
+	- Backend: Node.js, Express.js.
+	- Database: MongoDB, Mongoose (with TTL for token/session expiration).
+	- Authentication: JWT (JSON Web Token).
+	- Payment Integration: Stripe or PayPal.
+	- Documentation: Swagger (Swagger UI and swagger-jsdoc).
+	- Real-Time: Socket.io (optional).
+	- Input Validation: express-validator.
+	- Environment Management: dotenv.
+	- Version Control: Git/GitHub.
