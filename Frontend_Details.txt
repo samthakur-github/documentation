@@ -1,0 +1,99 @@
+Frontend Features to Implement:
+
+1. User Authentication (Login, Signup, Logout)
+    Sign Up:
+        - Users can create an account with basic details (name, email, password).
+        - Validation: Ensure that the email is valid, and password is strong (e.g., min 6 characters).
+        - UI: Simple form with fields for name, email, password, and a submit button.
+        - On successful registration, a confirmation message is shown, and the user is redirected to the login page.
+
+    Login:
+        - Users can log in with their email and password.
+        - On successful login, the backend returns a JWT (JSON Web Token), which is stored in localStorage or sessionStorage.
+        - UI: Simple form with email and password fields.
+        - Once logged in, the user should be redirected to the homepage or previous page.
+
+    Logout:
+        - Clicking logout will clear the JWT from the localStorage/sessionStorage.
+        - On logout, the user should be redirected to the login page, and the header should update to reflect the logged-out state (no "Profile" link, "Login" button, etc.).
+
+
+2. Product Management  (Display Products, Product Details, Collection, Cart Operations)
+    Product Listings (Homepage):
+        - Display featured or latest products fetched from the backend.
+        - Basic UI layout with product image, name, price, and “Add to Cart” button.
+        - Basic UI layout with product image, name, price, and “Add to Cart” button.
+
+    Collection Page (collection.html):
+        - Shows products filtered by category, brand, or price range.
+        - Implement filters on the left (or top), like:
+            -> Category (Electronics, Fashion, etc.)
+            -> Price Range (Under ₹500, ₹500–1000, etc.)
+            -> Brand or Merchant (if applicable)
+
+        - Clicking a product navigates to the Product Details Page.
+        - Backend API: You’ll use filtered product endpoints (e.g., /products?category=electronics&price[lte]=1000).
+
+    Product Details Page:
+        - When a user clicks on a product, they are taken to a dedicated product details page.
+        - Fetch the product info using the product ID in the URL (/product.html?id=123).
+        
+        - Display:
+            -> Full-size image, name, price, description, category, stock, and ratings.
+            -> An input to select quantity and an “Add to Cart” button.
+
+        - Optionally, show similar products or merchant info.
+
+    Add to Cart:
+        - When a user clicks "Add to Cart," the product is added to the local cart (in localStorage or in the session).
+        - Each cart item should include product ID, quantity, price, and merchant info.
+        - Show a Cart icon in the header that updates with the current quantity of items in the cart.
+
+    
+3. Cart and Checkout Management
+    View Cart Page:
+        - Display all products in the cart with the option to increase/decrease quantity, remove items, or clear the entire cart.
+        - Show the total price and allow the user to proceed to checkout.
+    
+    Checkout:
+        - Allow the user to proceed to checkout, providing their shipping details (name, address, etc.).
+        - Payment Gateway: Integrate the payment gateway (Stripe or PayPal) to handle payments. You'll only need the client-side integration here—sending the payment info to the backend.
+        - After a successful payment, the order status is updated, and the user receives a success message.
+
+
+4. Header & Navigation
+    Header: 
+        - On each page, display a header with links:
+            -> "Home", "Login", "Sign Up", "Cart"
+
+        - If the user is logged in, display:
+            -> "Profile", "Logout" instead of "Login" and "Sign Up".
+
+        - The cart icon should display the current quantity of items in the cart.
+
+    
+5.  User Profile (Optional)
+    View Profile:
+        - If the user is logged in, they can view their profile (name, email).
+        - The profile can be linked from the header when the user is logged in.
+        - UI: Display the user's details, with an option to update their information.
+
+    
+6. Payment Gateway Integration (Frontend)
+    Payment Integration:
+        - On the checkout page, integrate with Stripe or PayPal.
+        - On success, send the payment details to the backend to update the order and mark it as paid.
+        - Display a success or failure message based on the response from the payment gateway.
+
+
+    
+-------------------------------------
+
+Frontend Pages (Total: 6 Pages)
+    - Login Page (login.html)
+    - Signup Page (signup.html)
+    - Home Page / Some Products with their collection (index.html)
+    - Collection page with filter (price, brand etc.)
+    - Product Details Page (product.html)
+    - Cart Page (cart.html)
+    - Checkout Page (checkout.html)
